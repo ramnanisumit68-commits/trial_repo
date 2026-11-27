@@ -6,7 +6,7 @@
     "dev": "node init && next dev",
     "build": "node init && next build",
     "start": "node init && next start"
-  },
+  },  
   "dependencies": {
     "next": "16.4.6",
     "react": "19.3.0",
