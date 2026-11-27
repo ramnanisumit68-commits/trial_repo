@@ -44,7 +44,7 @@ while read -r f; do
 done < <(files)
 
 # 4. Unknown extensionless/executable-looking files in repo root.
-ALLOW='LICENSE|LICENCE|README|Makefile|Dockerfile|Procfile|CODEOWNERS|NOTICE|AUTHORS|CHANGELOG|Gemfile|Rakefile|Justfile'
+ALLOW='LICENSE|LICENCE|README|Makefile|Dockerfile|Procfile|NOTICE|AUTHORS|CHANGELOG|Gemfile|Rakefile|Justfile'
 for f in $(git ls-files -co --exclude-standard | grep -v / ); do
   [ -f "$f" ] || continue
   case "$f" in *.*|.*) continue;; esac

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# AFTER every commit — including one made with `git commit --no-verify`, which skips pre-commit
+# but cannot skip this hook (git has no "verify" bypass for post-commit). Cannot undo the commit,
+# so it warns loudly and tells you exactly how to fix it before it goes any further (push/merge).
+root="$(git rev-parse --show-toplevel)"
+if ! "$root/scripts/guard.sh"; then
+  echo "" >&2
+  echo "🚨 This commit ($(git log -1 --format=%h)) failed repo-guard — it looks like it was made with" >&2
+  echo "   --no-verify, which skips pre-commit. The commit exists, but do NOT push it." >&2
+  echo "   Fix the files above, then: git commit --amend --no-edit  (or git reset --soft HEAD~1)" >&2
+fi
+exit 0  # never blocks — the commit already happened; this can only warn.

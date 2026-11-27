@@ -9,7 +9,7 @@ set -uo pipefail
 mode="${1:---merged}"
 cd "$(git rev-parse --show-toplevel)"
 MAXLINE=${GUARD_MAX_LINE:-400}
-ALLOW='LICENSE|LICENCE|README|Makefile|Dockerfile|Procfile|CODEOWNERS|NOTICE|AUTHORS|CHANGELOG|Gemfile|Rakefile|Justfile'
+ALLOW='LICENSE|LICENCE|README|Makefile|Dockerfile|Procfile|NOTICE|AUTHORS|CHANGELOG|Gemfile|Rakefile|Justfile'
 # Never purge the guard's own files or lockfiles/binaries/vendored dirs.
 SKIP='(^|/)(node_modules|\.next|dist|build|public|vendor)/|^scripts/(guard|purge|validate)\.sh$|^\.githooks/|package-lock\.json$|yarn\.lock$|pnpm-lock\.yaml$|\.(png|jpe?g|gif|svg|ico|woff2?|ttf|pdf|map|min\.js)$'
 
