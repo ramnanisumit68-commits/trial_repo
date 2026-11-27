@@ -1,0 +1,7 @@
+# Changes to these paths need review from the listed owner (enable "Require review from Code Owners").
+# Replace @ramnanisumit68-commits before use.
+/.github/        @ramnanisumit68-commits
+/scripts/        @ramnanisumit68-commits
+/.githooks/      @ramnanisumit68-commits
+/package.json    @ramnanisumit68-commits
+*.config.*       @ramnanisumit68-commits

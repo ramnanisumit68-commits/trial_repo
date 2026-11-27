@@ -1,0 +1,36 @@
+name: Validate
+on:
+  pull_request:          # BEFORE merge: PR into ANY branch must pass
+  merge_group:           # BEFORE merge: final check in the merge queue
+  push:                  # AFTER merge/push: re-verify on EVERY branch (no branch filter)
+permissions:
+  contents: read
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./scripts/guard.sh
+  validate:
+    needs: guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: ./scripts/validate.sh
+  post-merge-alert:
+    # Only after a push/merge on any branch: if anything failed, open an issue so it is not missed.
+    if: ${{ failure() && github.event_name == 'push' }}
+    needs: [guard, validate]
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create --repo "${{ github.repository }}" \
+            --title "Post-merge validation failed on ${GITHUB_REF_NAME} (${GITHUB_SHA::7})" \
+            --body "Validation failed after merge. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"

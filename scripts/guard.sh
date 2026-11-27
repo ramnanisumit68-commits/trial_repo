@@ -28,6 +28,19 @@ while read -r f; do
       grep -nE 'child_process|eval[[:space:]]*\(|new[[:space:]]+Function|https?://[^"'"'"' ]*[?&]|\.exec(Sync)?\(|spawn(Sync)?\(' "$f" >/dev/null \
         && flag "$f: config file uses eval/child_process/exec/network" ;;
   esac
+  # 3b. javascript-obfuscator-style decoder payload, in ANY file (not just config files).
+  # Fingerprint is the *shape* of known malicious samples, not instance-specific identifier names
+  # (those are randomized per build): a big hex-string array reached through the obfuscator's
+  # self-defending ['push']('shift') array-rotation loop, decoded with a Uint8Array/XOR/TextDecoder
+  # pipeline, and then written onto global/globalThis (or module) via a computed property name.
+  hits=0
+  grep -qE "\['push'\]\([A-Za-z_$][A-Za-z0-9_$]*\['shift'\]\(\)\)" "$f" && hits=$((hits+1))
+  grep -qE 'new TextDecoder\(\)' "$f" && hits=$((hits+1))
+  grep -qE 'new Uint8Array\(' "$f" && hits=$((hits+1))
+  grep -qE "[.a-zA-Z'\"]match['\"]?\]?\(/\.\{1,2\}/g\)" "$f" && hits=$((hits+1))
+  grep -qE '\(global,\s*(require|module|exports)' "$f" && hits=$((hits+1))
+  grep -qE 'typeof module' "$f" && hits=$((hits+1))
+  [ "$hits" -ge 3 ] && flag "$f: matches known obfuscator-payload shape (hex-array decoder + XOR/TextDecoder + global-patching IIFE) — $hits/6 markers"
 done < <(files)
 
 # 4. Unknown extensionless/executable-looking files in repo root.

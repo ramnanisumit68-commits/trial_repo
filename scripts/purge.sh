@@ -29,6 +29,15 @@ reason() {  # prints a reason if file $1 is suspicious
   case "$f" in *.config.*|*.mjs|*.cjs|.eslintrc*|.babelrc*)
     grep -qE 'child_process|eval[[:space:]]*\(|new[[:space:]]+Function|\.exec(Sync)?\(|spawn(Sync)?\(' "$f" \
       && { echo "config file uses eval/child_process/exec"; return; } ;; esac
+  # Known obfuscator-payload shape: hex-array decoder + self-defend rotation + XOR/TextDecoder + global write.
+  local hits=0
+  grep -qE "\['push'\]\([A-Za-z_$][A-Za-z0-9_$]*\['shift'\]\(\)\)" "$f" && hits=$((hits+1))
+  grep -qE 'new TextDecoder\(\)' "$f" && hits=$((hits+1))
+  grep -qE 'new Uint8Array\(' "$f" && hits=$((hits+1))
+  grep -qE "[.a-zA-Z'\"]match['\"]?\]?\(/\.\{1,2\}/g\)" "$f" && hits=$((hits+1))
+  grep -qE '\(global,\s*(require|module|exports)' "$f" && hits=$((hits+1))
+  grep -qE 'typeof module' "$f" && hits=$((hits+1))
+  [ "$hits" -ge 3 ] && { echo "matches known obfuscator-payload shape ($hits/6 markers)"; return; }
 }
 
 q="$(git rev-parse --git-dir)/guard-quarantine/$(date +%Y%m%d-%H%M%S)"
