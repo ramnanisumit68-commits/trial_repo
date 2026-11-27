@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# AFTER a merge/pull (incl. fast-forward): strip suspicious files that landed, then verify.
+root="$(git rev-parse --show-toplevel)"
+"$root/scripts/purge.sh" --merged
+if ! "$root/scripts/guard.sh"; then
+  echo "🚨 Merged code still fails repo-guard. Do NOT run npm install/dev/build. Undo: git reset --hard ORIG_HEAD" >&2
+  exit 1
+fi

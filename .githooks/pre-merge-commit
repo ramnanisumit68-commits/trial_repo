@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# BEFORE the merge commit is created: strip suspicious files the merge brought in, then verify.
+root="$(git rev-parse --show-toplevel)"
+"$root/scripts/purge.sh" --index
+exec "$root/scripts/guard.sh"
