@@ -65,6 +65,7 @@ fi
 
 # 6. CI/hook files must not download-and-run.
 for f in $(git ls-files -co --exclude-standard .github .githooks 2>/dev/null); do
+  [ -f "$f" ] || continue
   grep -nE 'curl[^|]*\|[[:space:]]*(sh|bash)|wget[^|]*\|[[:space:]]*(sh|bash)|base64[[:space:]]+(-d|--decode)' "$f" >/dev/null \
     && flag "$f: downloads and executes remote code"
 done
